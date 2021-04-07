@@ -1,0 +1,809 @@
+<head>
+    <!-- Include Handsfree.js -->
+    <link rel="stylesheet" href="https://unpkg.com/handsfree@8.4.4/build/lib/assets/handsfree.css" />
+    <script src="https://unpkg.com/handsfree@8.4.4/build/lib/handsfree.js"></script>
+    <title>Gesture Music</title>
+  </head>
+
+  <body style="-webkit-app-region: drag; width:100%;margin:0; overflow:hidden">
+    <div style="z-index: 10; bottom:10px; position:absolute; width: 100%; text-align:center; margin:2%; -webkit-app-region: none; display:flex">
+      <audio id="music" controls src="https://archive.org/download/Mozart_20160424_2121/Mozart-Turkish_March.mp3" style="width: calc(100% - 130px); height:40px" controlsList="nodownload"></audio>
+      <span style="padding: 5px;"></span><div style="background-color: rgb(243, 243, 243); border-radius:30px;height:40px;width:100px;">
+        <button style="background: none; border:none;position:relative; float:left; padding-left:15px; padding-top:7px" onclick="if (songid-1 >= 0) {songid -= 1;music.src = 'file://'+thesongs[songid]} else {songid=0; music.src = 'file://'+thesongs[songid]};music.play()"><img src="../Icons/Back Button.svg" style="width:25px"></button>
+        <button style="background: none; border:none;position:relative; float:left; padding-left:15px; padding-top:7px" onclick="if (thesongs[songid+1] != undefined) {songid += 1;music.src = 'file://'+thesongs[songid]} else {songid=0; music.src = 'file://'+thesongs[songid]};music.play()"><img src="../Icons/Forward Button.svg" style="width:25px"></button>
+      </div>
+    </div>
+    <style>
+      .control {
+        margin: 0;
+  position: absolute;
+  top: 50%;
+  -ms-transform: translateY(-50%);
+  transform: translateY(-50%);
+  width: 100px;
+  margin-left:calc(50% - 50px)
+      }
+    </style>
+    
+    <img src="../Icons/Play Button.svg" class="control" style="z-index: 10;" hidden id="control">
+    <!-- Your code must be inside body as it applies classes to it -->
+    <script>
+      const {remote} = require('electron')
+      console.log(remote.Menu)
+      let menu = new remote.Menu()
+      let songid
+      let thesongs = []
+      const music = document.getElementById('music')
+      let fileMenu = new remote.MenuItem({label:'Load Songs', click:()=>{
+        remote.dialog.showOpenDialog({ properties: ['openFile', 'multiSelections'],filters: [
+        { name: 'Music Files', extensions: ['ogg', 'mp3'] }
+      ] }).then(result => {
+        music.src = ('file://'+result.filePaths[0])
+        songid = 0
+        thesongs = result.filePaths
+      }).catch(err => {
+        console.log(err)
+      })
+    }})
+      menu.append(fileMenu)
+      remote.BrowserWindow.getFocusedWindow().setMenu(menu)
+    let data2
+      // Let's use handtracking and show the webcam feed with wireframes
+      const handsfree = new Handsfree({
+          showDebug: true,
+          hands: true,
+          minDetectionConfidence: 1,
+          minTrackingConfidence: 1,
+          maxNumHands:2
+        })
+          handsfree.useGesture({
+            "name": "Play",
+            "algorithm": "fingerpose",
+            "models": "hands",
+            "confidence": "8.75",
+            "description": [
+              [
+                "addCurl",
+                "Thumb",
+                "NoCurl",
+                1
+              ],
+              [
+                "addDirection",
+                "Thumb",
+                "DiagonalUpLeft",
+                1
+              ],
+              [
+                "addDirection",
+                "Thumb",
+                "VerticalUp",
+                0.045454545454545456
+              ],
+              [
+                "addCurl",
+                "Index",
+                "NoCurl",
+                1
+              ],
+              [
+                "addDirection",
+                "Index",
+                "DiagonalUpLeft",
+                1
+              ],
+              [
+                "addDirection",
+                "Index",
+                "VerticalUp",
+                0.15
+              ],
+              [
+                "addCurl",
+                "Middle",
+                "NoCurl",
+                1
+              ],
+              [
+                "addDirection",
+                "Middle",
+                "VerticalUp",
+                1
+              ],
+              [
+                "addCurl",
+                "Ring",
+                "NoCurl",
+                1
+              ],
+              [
+                "addDirection",
+                "Ring",
+                "VerticalUp",
+                1
+              ],
+              [
+                "addCurl",
+                "Pinky",
+                "NoCurl",
+                1
+              ],
+              [
+                "addDirection",
+                "Pinky",
+                "DiagonalUpRight",
+                1
+              ],
+              [
+                "setWeight",
+                "Thumb",
+                2
+              ],
+              [
+                "setWeight",
+                "Index",
+                2
+              ],
+              [
+                "setWeight",
+                "Middle",
+                2
+              ],
+              [
+                "setWeight",
+                "Ring",
+                2
+              ],
+              [
+                "setWeight",
+                "Pinky",
+                2
+              ]
+            ],
+            "enabled": true
+          })
+
+          handsfree.useGesture({
+            "name": "Pause",
+            "algorithm": "fingerpose",
+            "models": "hands",
+            "confidence": "8.75",
+            "description": [
+              [
+                "addCurl",
+                "Thumb",
+                "NoCurl",
+                1
+              ],
+              [
+                "addCurl",
+                "Thumb",
+                "HalfCurl",
+                0.16666666666666666
+              ],
+              [
+                "addDirection",
+                "Thumb",
+                "DiagonalUpRight",
+                1
+              ],
+              [
+                "addDirection",
+                "Thumb",
+                "VerticalUp",
+                0.16666666666666666
+              ],
+              [
+                "addCurl",
+                "Index",
+                "NoCurl",
+                1
+              ],
+              [
+                "addCurl",
+                "Index",
+                "FullCurl",
+                0.4
+              ],
+              [
+                "addDirection",
+                "Index",
+                "DiagonalUpLeft",
+                1
+              ],
+              [
+                "addDirection",
+                "Index",
+                "VerticalUp",
+                0.5
+              ],
+              [
+                "addDirection",
+                "Index",
+                "DiagonalUpRight",
+                0.25
+              ],
+              [
+                "addCurl",
+                "Middle",
+                "NoCurl",
+                1
+              ],
+              [
+                "addCurl",
+                "Middle",
+                "FullCurl",
+                0.4
+              ],
+              [
+                "addDirection",
+                "Middle",
+                "VerticalUp",
+                1
+              ],
+              [
+                "addDirection",
+                "Middle",
+                "DiagonalUpRight",
+                0.16666666666666666
+              ],
+              [
+                "addCurl",
+                "Ring",
+                "FullCurl",
+                1
+              ],
+              [
+                "addDirection",
+                "Ring",
+                "VerticalUp",
+                1
+              ],
+              [
+                "addDirection",
+                "Ring",
+                "DiagonalUpRight",
+                0.5
+              ],
+              [
+                "addDirection",
+                "Ring",
+                "DiagonalUpLeft",
+                0.25
+              ],
+              [
+                "addCurl",
+                "Pinky",
+                "FullCurl",
+                1
+              ],
+              [
+                "addCurl",
+                "Pinky",
+                "HalfCurl",
+                0.16666666666666666
+              ],
+              [
+                "addDirection",
+                "Pinky",
+                "DiagonalUpRight",
+                1
+              ],
+              [
+                "addDirection",
+                "Pinky",
+                "VerticalUp",
+                0.4
+              ],
+              [
+                "setWeight",
+                "Index",
+                2
+              ],
+              [
+                "setWeight",
+                "Middle",
+                2
+              ]
+            ],
+            "enabled": true
+          })
+
+          handsfree.useGesture({
+            "name": "VolUp",
+            "algorithm": "fingerpose",
+            "models": "hands",
+            "confidence": "8",
+            "description": [
+              [
+                "addCurl",
+                "Thumb",
+                "NoCurl",
+                1
+              ],
+              [
+                "addDirection",
+                "Thumb",
+                "HorizontalLeft",
+                1
+              ],
+              [
+                "addDirection",
+                "Thumb",
+                "DiagonalUpLeft",
+                0.1
+              ],
+              [
+                "addCurl",
+                "Index",
+                "NoCurl",
+                1
+              ],
+              [
+                "addDirection",
+                "Index",
+                "VerticalUp",
+                1
+              ],
+              [
+                "addDirection",
+                "Index",
+                "DiagonalUpLeft",
+                0.1
+              ],
+              [
+                "addCurl",
+                "Middle",
+                "FullCurl",
+                1
+              ],
+              [
+                "addDirection",
+                "Middle",
+                "VerticalUp",
+                1
+              ],
+              [
+                "addDirection",
+                "Middle",
+                "DiagonalUpLeft",
+                0.1
+              ],
+              [
+                "addCurl",
+                "Ring",
+                "FullCurl",
+                1
+              ],
+              [
+                "addDirection",
+                "Ring",
+                "VerticalUp",
+                1
+              ],
+              [
+                "addDirection",
+                "Ring",
+                "DiagonalUpLeft",
+                0.1
+              ],
+              [
+                "addCurl",
+                "Pinky",
+                "FullCurl",
+                1
+              ],
+              [
+                "addDirection",
+                "Pinky",
+                "DiagonalUpRight",
+                1
+              ],
+              [
+                "addDirection",
+                "Pinky",
+                "DiagonalUpLeft",
+                0.1
+              ],
+              [
+                "setWeight",
+                "Thumb",
+                2
+              ],
+              [
+                "setWeight",
+                "Index",
+                2
+              ],
+              [
+                "setWeight",
+                "Middle",
+                2
+              ],
+              [
+                "setWeight",
+                "Pinky",
+                2
+              ]
+            ],
+            "enabled": true
+          })
+          
+          handsfree.useGesture({
+            "name": "VolDown",
+            "algorithm": "fingerpose",
+            "models": "hands",
+            "confidence": "8",
+            "description": [
+              [
+                "addCurl",
+                "Thumb",
+                "NoCurl",
+                1
+              ],
+              [
+                "addDirection",
+                "Thumb",
+                "DiagonalDownLeft",
+                1
+              ],
+              [
+                "addDirection",
+                "Thumb",
+                "HorizontalLeft",
+                0.07692307692307693
+              ],
+              [
+                "addCurl",
+                "Index",
+                "NoCurl",
+                1
+              ],
+              [
+                "addCurl",
+                "Index",
+                "HalfCurl",
+                0.08333333333333333
+              ],
+              [
+                "addCurl",
+                "Index",
+                "FullCurl",
+                0.08333333333333333
+              ],
+              [
+                "addDirection",
+                "Index",
+                "VerticalDown",
+                1
+              ],
+              [
+                "addDirection",
+                "Index",
+                "DiagonalDownLeft",
+                0.16666666666666666
+              ],
+              [
+                "addCurl",
+                "Middle",
+                "FullCurl",
+                1
+              ],
+              [
+                "addDirection",
+                "Middle",
+                "DiagonalDownLeft",
+                1
+              ],
+              [
+                "addDirection",
+                "Middle",
+                "VerticalDown",
+                0.4
+              ],
+              [
+                "addCurl",
+                "Ring",
+                "FullCurl",
+                1
+              ],
+              [
+                "addDirection",
+                "Ring",
+                "VerticalDown",
+                1
+              ],
+              [
+                "addCurl",
+                "Pinky",
+                "FullCurl",
+                1
+              ],
+              [
+                "addDirection",
+                "Pinky",
+                "VerticalDown",
+                1
+              ],
+              [
+                "setWeight",
+                "Thumb",
+                2
+              ],
+              [
+                "setWeight",
+                "Index",
+                2
+              ],
+              [
+                "setWeight",
+                "Middle",
+                2
+              ],
+              [
+                "setWeight",
+                "Pinky",
+                2
+              ]
+            ],
+            "enabled": true
+          })
+          
+          handsfree.useGesture({
+            "name": "Next",
+            "algorithm": "fingerpose",
+            "models": "hands",
+            "confidence": "8",
+            "description": [
+              [
+                "addCurl",
+                "Thumb",
+                "NoCurl",
+                1
+              ],
+              [
+                "addDirection",
+                "Thumb",
+                "DiagonalUpLeft",
+                1
+              ],
+              [
+                "addCurl",
+                "Index",
+                "NoCurl",
+                1
+              ],
+              [
+                "addDirection",
+                "Index",
+                "HorizontalLeft",
+                1
+              ],
+              [
+                "addCurl",
+                "Middle",
+                "NoCurl",
+                1
+              ],
+              [
+                "addDirection",
+                "Middle",
+                "HorizontalLeft",
+                1
+              ],
+              [
+                "addCurl",
+                "Ring",
+                "FullCurl",
+                1
+              ],
+              [
+                "addDirection",
+                "Ring",
+                "HorizontalLeft",
+                1
+              ],
+              [
+                "addCurl",
+                "Pinky",
+                "FullCurl",
+                1
+              ],
+              [
+                "addDirection",
+                "Pinky",
+                "HorizontalLeft",
+                1
+              ],
+              [
+                "setWeight",
+                "Thumb",
+                2
+              ],
+              [
+                "setWeight",
+                "Index",
+                2
+              ],
+              [
+                "setWeight",
+                "Middle",
+                2
+              ],
+              [
+                "setWeight",
+                "Pinky",
+                2
+              ]
+            ],
+            "enabled": true
+          })
+          
+          handsfree.useGesture({
+            "name": "Previous",
+            "algorithm": "fingerpose",
+            "models": "hands",
+            "confidence": "8",
+            "description": [
+              [
+                "addCurl",
+                "Thumb",
+                "NoCurl",
+                1
+              ],
+              [
+                "addDirection",
+                "Thumb",
+                "DiagonalUpRight",
+                1
+              ],
+              [
+                "addCurl",
+                "Index",
+                "NoCurl",
+                1
+              ],
+              [
+                "addDirection",
+                "Index",
+                "HorizontalRight",
+                1
+              ],
+              [
+                "addCurl",
+                "Middle",
+                "NoCurl",
+                1
+              ],
+              [
+                "addDirection",
+                "Middle",
+                "HorizontalRight",
+                1
+              ],
+              [
+                "addCurl",
+                "Ring",
+                "FullCurl",
+                1
+              ],
+              [
+                "addDirection",
+                "Ring",
+                "HorizontalRight",
+                1
+              ],
+              [
+                "addCurl",
+                "Pinky",
+                "FullCurl",
+                1
+              ],
+              [
+                "addDirection",
+                "Pinky",
+                "HorizontalRight",
+                1
+              ],
+              [
+                "setWeight",
+                "Thumb",
+                2
+              ],
+              [
+                "setWeight",
+                "Index",
+                2
+              ],
+              [
+                "setWeight",
+                "Middle",
+                2
+              ],
+              [
+                "setWeight",
+                "Pinky",
+                2
+              ]
+            ],
+            "enabled": true
+          })
+          
+          handsfree.start()
+          let canskip = true
+          let canback = true
+  let controls = document.getElementById('control')
+  music.onended = function () {
+    if (thesongs[songid+1] != undefined) {
+      songid += 1
+      music.src = 'file://'+thesongs[songid]
+    } else {songid=0; music.src = 'file://'+thesongs[songid]}
+    music.play()
+  }
+      // Create a plugin named "logger" to show data on every frame
+      handsfree.use('logger', data => {
+        data2 = data
+        try {
+            if (data2.hands.gesture[0].name == 'Play'){
+              if (music.paused){
+                music.play()
+                controls.src = '../Icons/Play Button.svg'
+                controls.hidden = false
+                setTimeout(()=>{controls.hidden = true}, 2000)
+              }
+              
+            } else if (data2.hands.gesture[0].name == 'Pause'){
+              if (music.paused == false){
+                music.pause()
+                controls.src = '../Icons/Pause Button.svg'
+                controls.hidden = false
+                setTimeout(()=>{controls.hidden = true}, 2000)
+              }
+            }
+            else if (data2.hands.gesture[0].name == 'VolUp'){
+                if (music.volume <= 0.98){
+                    music.volume+=0.02
+                    controls.src = '../Icons/VolUp.svg'
+                    controls.hidden = false
+                    setTimeout(()=>{controls.hidden = true}, 2000)
+                }
+            }
+            else if (data2.hands.gesture[0].name == 'VolDown'){
+                if (music.volume >= 0.2){
+                    music.volume-=0.02
+                    controls.src = '../Icons/VolDown.svg'
+                    controls.hidden = false
+                    setTimeout(()=>{controls.hidden = true}, 2000)
+                }
+            }
+            else if (data2.hands.gesture[0].name == 'Next' && canskip){
+              canskip = false
+              if (thesongs[songid+1] != undefined) {
+                songid += 1
+                music.src = 'file://'+thesongs[songid]
+              } else {songid=0; music.src = 'file://'+thesongs[songid]}
+              music.play()
+              controls.src = '../Icons/Forward Popup.svg'
+              controls.hidden = false
+              setTimeout(()=>{controls.hidden = true}, 2000)
+              setTimeout(()=>{canskip=true}, 2000)
+          } else if ((data2.hands.gesture[0].name == 'Previous' || data2.hands.gesture[1].name == 'Previous') && canback){
+              canback = false
+              if (thesongs[songid+1] != undefined) {
+                songid -= 1
+                music.src = 'file://'+thesongs[songid]
+              } else {songid=0; music.src = 'file://'+thesongs[songid]}
+              music.play()
+              controls.src = '../Icons/Back Popup.svg'
+              controls.hidden = false
+              setTimeout(()=>{controls.hidden = true}, 2000)
+              setTimeout(()=>{canback=true}, 2000)
+            } 
+        }
+        catch (err){
+        }
+
+      })
+      document.body.style.margin = '0'
+    </script>
+  </body>
